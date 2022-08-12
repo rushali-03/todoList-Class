@@ -1,31 +1,24 @@
 import './App.css';
 import Input from './components/Input';
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Todo from './components/Todo';
-import React, { Component } from 'react';
-import { uuid } from 'uuidv4';
 
 function App() {
-  // state = {
-  //   text: '',
-  //   todos: JSON.parse(localStorage.getItem('todos')) || [],
-  //   mode: "all",
-  // };
 
   const [text, setText] = useState("");
-  const [todos, setTodos] = useState(JSON.parse(localStorage.getItem('todos')) || [],); //useState([]); 
+  const [todos, setTodos] = useState(JSON.parse(localStorage.getItem('todos')) || [],); 
   const [mode, setMode] = useState("all");
 
-  const addTodo = () => {
-    const newTodos = [...todos, {text, id: new Date(), isCompleted: false }];
+  const addTodo = useCallback(() => {
+    console.log("text: ", text);
+    const newTodos = [...todos, {text: text, id: new Date(), isCompleted: false }];
     setTodos(newTodos);
-    // console.log("todos:", newTodos);
-    setText("");
-
+    
     localStorage.setItem('todos', JSON.stringify([...todos, { text: text, isCompleted: false }]));
     console.log(localStorage.getItem('todos'));
     localStorage.setItem("todos", JSON.stringify(newTodos));
-  };
+    setText("");
+  }, [text, todos]);
 
   const onKeyDown = (e) => {
     console.log(e.keyCode);
@@ -35,7 +28,7 @@ function App() {
     }
   };
 
-  const deleteTodo = (item) => {
+  const deleteTodo = useCallback((item) => {
     const newTodo = [...todos];
     const newListArray = newTodo.filter((item1) => {
       return item.id !== item1.id;
@@ -44,7 +37,7 @@ function App() {
 
     localStorage.setItem('todos', JSON.stringify(newListArray));
     console.log(localStorage.getItem('todos'));
-  };
+  },[todos]);
 
   const allFilter = () => {
     setMode("all");
@@ -61,14 +54,14 @@ function App() {
     console.log(mode);
   }
 
-  const clearCompleted = () => {
+  const clearCompleted = useCallback(() => {
     const newTodo = [...todos];
     const newListArray = newTodo.filter(item1 => !item1.isCompleted);
     console.log(newListArray);
     setTodos(newListArray);
 
     localStorage.setItem("todos", JSON.stringify(newListArray));
-  }
+  },[todos])
 
 
   let listToMap = mode === "all" ? todos : mode === 'active' ? todos.filter(todo => !todo.isCompleted) : todos.filter(todo => todo.isCompleted);
@@ -78,7 +71,7 @@ function App() {
       <div className='input-row'>
         <Input
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          setText = {setText}
           onKeyDown={onKeyDown}
         />
       </div>
