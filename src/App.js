@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
-
 import './App.css';
+
 import Button from "./components/Button";
 import Input from './components/Input';
 import Todo from './components/Todo';
@@ -19,11 +19,11 @@ function App() {
     setText("");
   }, [text, todos]);
 
-  const onKeyDown = (e) => {
+  const onKeyDown = useCallback((e) => {
     if (e.keyCode === 13) {
       addTodo();
     }
-  };
+  },[addTodo]);
 
   const deleteTodo = useCallback((item) => {
     const newTodo = [...todos];
@@ -55,8 +55,8 @@ function App() {
     localStorage.setItem("todos", JSON.stringify(newListArray));
   },[todos])
 
-
   const listToMap = useMemo(() => mode === "all" ? todos : mode === 'active' ? todos.filter(todo => !todo.isCompleted) : todos.filter(todo => todo.isCompleted),[mode,todos ]);
+  
   return (
     <div className="App">
       <p className="header-1">todos</p>
@@ -72,7 +72,6 @@ function App() {
       })}
       <div className='Footer'>
         <p>Total Items: {todos.length}</p>
-        {/* <button className='footer-btn' onClick={allFilter}>All</button> */}
         <Button 
           className="footer-btn"
           onClick={allFilter}
