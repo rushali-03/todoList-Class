@@ -1,23 +1,19 @@
-import React, { Component, useCallback } from 'react';
-import { useState } from "react";
-import '../App.css';
-function Todo({todo, key, deleteTodo}) {
+import React, { useCallback } from 'react';
 
+import '../App.css';
+
+function Todo({ todo, key, deleteTodo }) {
   const handleOnChange = useCallback(() => {
     todo.isCompleted = !todo.isCompleted;
-    console.log(todo.isCompleted);
-
-    let todos = JSON.parse(localStorage.getItem('todos'));
-    for(let i=0; i<todos.length; i++){
-      if(todos[i].id === key){
-        console.log('todos: ', todos[i]);
-        console.log("todos before:", todos[i].isCompleted);
+    
+    const todos = JSON.parse(localStorage.getItem('todos'));
+    for (let i = 0; i < todos.length; i++) {
+      if (todos[i].id === key) {
         todos[i].isCompleted = !todos[i].isCompleted;
-        console.log("todos after:", todos[i].isCompleted);
       }
     }
     localStorage.setItem('todos', JSON.stringify(todos));
-  })
+  }, [todo, key])
 
   return (
     <div className='task-div'>
@@ -33,7 +29,7 @@ function Todo({todo, key, deleteTodo}) {
       </label>
       <button
         className='close'
-        onClick = {() =>{deleteTodo(todo)}}
+        onClick={() => { deleteTodo(todo) }}
       >X
       </button>
     </div>
