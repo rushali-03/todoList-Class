@@ -1,62 +1,38 @@
 import { useCallback, useMemo, useState } from "react";
-import './App.css';
+import { useSelector, useDispatch } from "react-redux";
 
+import './App.css';
 import Button from "./components/Button";
 import Input from './components/Input';
 import Todo from './components/Todo';
+import { setMode, addTodo, deleteTodo, clearCompleted } from "./redux/actions/todoActions";
 
 function App() {
   const [text, setText] = useState("");
-  const [todos, setTodos] = useState(JSON.parse(localStorage.getItem('todos')) || []); 
-  const [mode, setMode] = useState("all");
+  const mode = useSelector((state) => state.mode);
+  const todos = useSelector((state) => state.todos) || [];
+  const dispatch = useDispatch();
 
-  const addTodo = useCallback(() => {
-    const newTodos = [...todos, {text: text, id: new Date(), isCompleted: false }];
-    setTodos(newTodos);
-    
-    localStorage.setItem('todos', JSON.stringify([...todos, { text: text, isCompleted: false }]));
-    localStorage.setItem("todos", JSON.stringify(newTodos));
+  const addTodoHandler = useCallback(() => {
+    dispatch(addTodo(text));
     setText("");
-  }, [text, todos]);
+  }, [text,dispatch]);
 
   const onKeyDown = useCallback((e) => {
     if (e.keyCode === 13) {
-      addTodo();
+      addTodoHandler();
     }
-  },[addTodo]);
+  },[addTodoHandler]);
 
-  const deleteTodo = useCallback((item) => {
-    const newTodo = [...todos];
-    const newListArray = newTodo.filter((item1) => {
-      return item.id !== item1.id;
-    });
-    setTodos(newListArray);
+  const deleteTodoHandler = useCallback((item) => { //send id as payload
+    dispatch(deleteTodo(item.id));
+  },[dispatch]);
 
-    localStorage.setItem('todos', JSON.stringify(newListArray));
-  },[todos]);
-
-  const allFilter = useCallback(() => {
-    setMode("all");
-  },[])
-
-  const activeFilter = useCallback(() => {
-    setMode("active");
-  },[])
-
-  const completedFilter = useCallback(() => {
-    setMode("completed");
-  },[])
-
-  const clearCompleted = useCallback(() => {
-    const newTodo = [...todos];
-    const newListArray = newTodo.filter(item1 => !item1.isCompleted);
-    setTodos(newListArray);
-
-    localStorage.setItem("todos", JSON.stringify(newListArray));
-  },[todos])
+  const clearCompletedHandler = useCallback(() => {
+    dispatch(clearCompleted());
+  },[dispatch])
 
   const listToMap = useMemo(() => mode === "all" ? todos : mode === 'active' ? todos.filter(todo => !todo.isCompleted) : todos.filter(todo => todo.isCompleted),[mode,todos ]);
-  
   return (
     <div className="App">
       <p className="header-1">todos</p>
@@ -68,28 +44,28 @@ function App() {
         />
       </div>
       {listToMap.map((todo) => {
-        return <Todo todo={todo} key={todo.id} deleteTodo={deleteTodo} />;
+        return <Todo todo={todo} key={todo.id} deleteTodo={deleteTodoHandler} />;
       })}
       <div className='Footer'>
         <p>Total Items: {todos.length}</p>
         <Button 
           className="footer-btn"
-          onClick={allFilter}
+          onClick={() => dispatch(setMode('all'))}
           label='All'
         />
         <Button 
           className="footer-btn"
-          onClick={activeFilter}
+          onClick={() => dispatch(setMode('active'))}
           label='Active'
         />
         <Button 
           className="footer-btn"
-          onClick={completedFilter}
+          onClick={() => dispatch(setMode('completed'))}
           label='Completed'
         />
         <Button 
           className="clear-completed"
-          onClick={clearCompleted}
+          onClick={clearCompletedHandler}
           label='Clear Completed'
         />
       </div>
